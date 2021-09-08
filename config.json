@@ -1,0 +1,9 @@
+{
+    "server":{
+        "host":"http://123.57.43.61",
+        "username":"yuanzhaoping",
+        "password":"yuan1890"
+    },
+    "localStorage":"/home/longruan/",
+    "downloader":["孙永","袁兆平","李颖"]
+}
