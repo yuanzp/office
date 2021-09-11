@@ -9,11 +9,11 @@ fs.readFile("./downloadLog.json", (err, data) => {
 
 
 _existLog = function (file) {
-    for(var i=0;i<files.length;i++){
-        if(files[i].ID==file.ID)
+    for (var i = 0; i < files.length; i++) {
+        if (files[i].ID == file.ID)
             return true;
     }
-   
+
     return false;
 }
 
@@ -27,8 +27,38 @@ _appendLog = function (file) {
         });
     }
 }
+_getLog = function (fileId) {
+    for (let index = 0; index < files.length; index++) {
+        if (fileId == files[index].ID)
+            return files[index];
+    }
+    return null;
+}
+_getLogs = function (year, month, day) {
+    var fs = [];
+    files.forEach(file => {
+        var _date = new Date(file.CreateTime);
+        if (_date.getFullYear() == year &&
+            _date.getMonth() == month &&
+            _date.getDate() == day) {
+            fs.push({
+                id: file.ID,
+                Name: file.Name + file.FileExt,
+                Department: file.DeptName,
+                Creator: file.CreatorName,
+                CreateTime: file.CreateTime,
+                Remark: file.Remark,
+                FileSize: file.FileSize
+            })
+        }
+    });
+
+    return fs;
+}
 
 module.exports = {
+    getLog: _getLog,
+    getLogs: _getLogs,
     existLog: _existLog,
     appendLog: _appendLog
 }

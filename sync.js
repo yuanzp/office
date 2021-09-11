@@ -50,7 +50,7 @@ function listFiles() {//列出文件
         form: {
             category: 'projectfile',
             page: 1,
-            rows: 1000
+            rows: 500//每次同步500条，基本上一周的记录会被获取到
         }
     }
 
@@ -103,26 +103,18 @@ function downloadFile(file, onsuccess) {//下载文件
             ids: file.ID
         }
     }
-    //避免文件名重复，增加上传时间标记
-    var d = new Date(file.UploadTime);
-    var updateTime = file.CreatorName+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+
-    +d.getDate()+'-'+d.getHours()+'时'+d.getMinutes()+'分';
-    var filename1 = file.Name + '(' + updateTime + ')' + file.FileExt+'.tmp';
-    var filename2 = file.Name + '(' + updateTime + ')' + file.FileExt;    
-    var writeStream = fs.createWriteStream(config.localStorage + filename1);
+    //
+    var filename=file.ID;    
+    var writeStream = fs.createWriteStream(config.localStorage + filename);
     var readStream = request(options);
     readStream.pipe(writeStream);
 
     readStream.on('end', function (response) {
-        console.log(filename2 + ' 下载完成\n');
+        console.log(file.Name + ' 下载完成\n');
         writeStream.end();
     });
 
-    writeStream.on("finish", function () {
-        fs.rename(config.localStorage +filename1,config.localStorage +filename2,(err)=>{
-            if(err)
-                console.log("重命名失败\n");
-        })
+    writeStream.on("finish", function () {       
         //创建下载记录
         downloadLog.appendLog(file);
         //继续下载
@@ -132,14 +124,17 @@ function downloadFile(file, onsuccess) {//下载文件
 }
 
 function runSync() {
+    var d=new Date();
+    var s=d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()
+    +" "+ d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
     if (syncState == 0) {//如果未启动，
         syncState = 1;//设置启动中
-        console.log("开始同步....\n");
+        console.log(s+ "开始同步....\n");
         login();
     }
     else if (syncState == 3)//如果是完成状态
     {
-        console.log("同步完成，1分钟后进行下一轮同步\n");
+        console.log(s+"同步完成，1分钟后进行下一轮同步\n");
         syncState = 0;//恢复未
         setTimeout(runSync, 1000 * 60);
     }
