@@ -25,12 +25,15 @@ app.get("/file", (req, res) => {
   else {
     var filename = file.Name + file.FileExt;
     fs.access(config.localStorage + file.ID, (err) => {
-      if (err.code == "ENOENT") {
-        res.status(404).send("没有找到对应的文件！")
-      }else{
+      if (err == null) {
         res.download(config.localStorage + file.ID, filename)
       }
-    })    
+      else {
+        if (err.code == "ENOENT") {
+          res.status(404).send("没有找到对应的文件！")
+        }
+      }
+    })
   }
 })
 
