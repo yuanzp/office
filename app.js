@@ -44,7 +44,12 @@ app.get("/files", (req, res) => {
   var files = downlogs.getLogs(year, month, day);
   res.send(files)
 })
-
+app.use((error, req, res, next) => {
+  fs.writeFile(__dirname + "/err.log", error.stack, "utf8", (err) => {
+    if (err != null)
+      console.log(err.message);
+  });
+})
 app.listen(port, () => {
   console.log(`sync app listening at http://localhost:${port}`)
   sync.run();

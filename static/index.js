@@ -63,7 +63,7 @@
                         "day": this.cDate.getDate()
                     }
                 }).then((res) => {
-                    target.files = res.data
+                    target.files = res.data.reverse()
                 })
             },
             toPreDate: function () {

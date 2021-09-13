@@ -104,7 +104,7 @@ function downloadFile(file, onsuccess) {//下载文件
         }
     }
     //
-    var filename=file.ID;    
+    var filename = file.ID;
     var writeStream = fs.createWriteStream(config.localStorage + filename);
     var readStream = request(options);
     readStream.pipe(writeStream);
@@ -114,7 +114,7 @@ function downloadFile(file, onsuccess) {//下载文件
         writeStream.end();
     });
 
-    writeStream.on("finish", function () {       
+    writeStream.on("finish", function () {
         //创建下载记录
         downloadLog.appendLog(file);
         //继续下载
@@ -124,17 +124,25 @@ function downloadFile(file, onsuccess) {//下载文件
 }
 
 function runSync() {
-    var d=new Date();
-    var s=d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate()
-    +" "+ d.getHours()+":"+d.getMinutes()+":"+d.getSeconds();
+    var d = new Date();
+    var s = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate()
+        + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
     if (syncState == 0) {//如果未启动，
         syncState = 1;//设置启动中
-        console.log(s+ "开始同步....\n");
+        fs.writeFile(__dirname + "/run.log", s + "开始同步....\n", "utf8", (err) => {
+            if (err != null)
+                console.log(err.message);
+        });
+        //console.log(s+ "开始同步....\n");
         login();
     }
     else if (syncState == 3)//如果是完成状态
     {
-        console.log(s+"同步完成，1分钟后进行下一轮同步\n");
+        fs.writeFile(__dirname + "/run1.log", s + "同步完成，1分钟后进行下一轮同步\n", "utf8", (err) => {
+            if (err != null)
+                console.log(err.message);
+        });
+        //console.log(s+"同步完成，1分钟后进行下一轮同步\n");
         syncState = 0;//恢复未
         setTimeout(runSync, 1000 * 60);
     }
