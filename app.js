@@ -52,6 +52,6 @@ app.use((error, req, res, next) => {
 })
 app.listen(port, () => {
   console.log(`sync app listening at http://localhost:${port}`)
-  sync.run();
+  console.log('同步状态:'+sync.state()+'\n');
 })
 

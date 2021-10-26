@@ -1,4 +1,9 @@
-var request = require("request")
+var request = require("request").defaults({
+    jar: true
+})//使用全局cookie
+
+const cron = require('node-cron')//计划任务调度
+
 var fs = require("fs")
 var config = require("./config.json")
 var downloadLog = require("./downloadlog")
@@ -21,7 +26,6 @@ function login() {//模拟登录
         uri: config.server.host + '/home/login',
         method: 'POST',
         headers: {
-            'User-Agent': `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36 Edg/92.0.902.84`,
             'Content-Type': 'application/json'
         },
         form: postData
@@ -29,10 +33,9 @@ function login() {//模拟登录
 
     request(options, (e, r, b) => {
         if (r.statusCode == 200) {
-            cookies = r.headers['set-cookie'];
             var result = JSON.parse(r.body);
             if (result.success) {
-                listFiles();
+                cookies = r.headers['set-cookie'];
             }
         }
     });
@@ -42,11 +45,6 @@ function listFiles() {//列出文件
     var options = {
         uri: config.server.host + '/Document/GetList',
         method: 'post',
-        headers: {
-            'User-Agent': `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36 Edg/92.0.902.84`,
-            'Content-Type': 'text/html; charset=utf-8',
-            'cookie': cookies
-        },
         form: {
             category: 'projectfile',
             page: 1,
@@ -86,7 +84,6 @@ function download() {
         }
     } else {//下载结束
         syncState = 3;
-        runSync();
     }
 }
 
@@ -94,11 +91,6 @@ function downloadFile(file, onsuccess) {//下载文件
     var options = {
         uri: config.server.host + '/Base/Document/ListDownload',
         method: 'get',
-        headers: {
-            'User-Agent': `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36 Edg/92.0.902.84`,
-            'Content-Type': 'text/html; charset=utf-8',
-            'cookie': cookies
-        },
         form: {
             ids: file.ID
         }
@@ -123,36 +115,40 @@ function downloadFile(file, onsuccess) {//下载文件
     });
 }
 
-function runSync() {
-    var d = new Date();
-    var s = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate()
-        + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-    if (syncState == 0) {//如果未启动，
-        syncState = 1;//设置启动中
-        fs.writeFile(__dirname + "/run.log", s + "开始同步....\n", "utf8", (err) => {
-            if (err != null)
-                console.log(err.message);
-        });
-        //console.log(s+ "开始同步....\n");
-        login();
-    }
-    else if (syncState == 3)//如果是完成状态
-    {
-        fs.writeFile(__dirname + "/run1.log", s + "同步完成，1分钟后进行下一轮同步\n", "utf8", (err) => {
-            if (err != null)
-                console.log(err.message);
-        });
-        //console.log(s+"同步完成，1分钟后进行下一轮同步\n");
-        syncState = 0;//恢复未
-        setTimeout(runSync, 1000 * 60);
-    }
-}
 
 function getState() {
     return syncState;
 }
 
+//
+cron.schedule('0 * * * * *', () => {
+
+    var d = new Date();
+    var s = d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate()
+        + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+
+    if (cookies == "") {
+        fs.writeFile(__dirname + "/run.log", s + "登录中...\n", "utf8", (err) => {
+            if (!err)
+                login()
+        });
+    }
+    else {
+        if (syncState == 0) {//如果未启动，
+            syncState = 1;//设置启动中
+            fs.writeFile(__dirname + "/run.log", s + "开始同步....\n", "utf8", (err) => {
+                if (!err)
+                    listFiles();
+            });
+        }
+        else if (syncState == 3)//如果是完成状态
+        {
+            syncState = 0;//恢复未            
+        }
+    }
+
+})
+
 module.exports = {
-    run: runSync,
     state: getState
 }
