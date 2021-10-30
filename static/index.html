@@ -76,12 +76,12 @@
       <tbody>
         <tr v-for="file in files">
           <td>
-            <a :href="'/file?fileId='+file.id" target="_blank">
+            <a :href="'/file?fileId='+file.ID" target="_blank">
               {{file.Name}}
             </a>
           </td>
-          <td>{{file.Department}}</td>
-          <td>{{file.Creator }}</td>
+          <td>{{file.DeptName}}</td>
+          <td>{{file.CreatorName }}</td>
           <td>{{file.CreateTime | formatDate}}</td>
           <td>{{file.Remark}}</td>
           <td>{{file.FileSize | conver}}</td>

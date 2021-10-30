@@ -68,15 +68,18 @@ function download() {
     if (downloadIndex < files.length) {
         var file = files[downloadIndex];
         if (config.downloader.indexOf(file.CreatorName) >= 0) {
-            if (downloadLog.existLog(file)) {
-                downloadIndex++;
-                download();
-            }
-            else {
-                downloadFile(file);
-                console.log("开始下载:" + file.Name + "\n");
-            }
-
+            downloadLog.existLog(file, (res) => {
+                if (res) {
+                    downloadIndex++;
+                    download();
+                }
+                else {
+                    downloadFile(file);
+                    console.log("开始下载:" + file.Name + "\n");
+                }
+            },(err)=>{
+                console.log(err.message);
+            })
         }
         else {
             downloadIndex++;
@@ -108,10 +111,11 @@ function downloadFile(file, onsuccess) {//下载文件
 
     writeStream.on("finish", function () {
         //创建下载记录
-        downloadLog.appendLog(file);
-        //继续下载
-        downloadIndex++;
-        download();
+        downloadLog.appendLog(file, (res) => {
+            //继续下载
+            downloadIndex++;
+            download();
+        });
     });
 }
 
@@ -120,7 +124,7 @@ function getState() {
     return syncState;
 }
 
-//
+
 cron.schedule('0 * * * * *', () => {
 
     var d = new Date();
