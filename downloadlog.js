@@ -1,59 +1,62 @@
-var fs = require("fs");
+const MongoClient = require("mongodb").MongoClient;
+const url = "mongodb://admin:longruan@localhost:27017/longruan";
+const mongoClient = new MongoClient(url);
 
-var files = [];
-fs.readFile("./downloadLog.json", (err, data) => {
-    if (err == null) {
-        files = JSON.parse(data);
-    }
-});
-
-
-_existLog = function (file) {
-    for (var i = 0; i < files.length; i++) {
-        if (files[i].ID == file.ID)
-            return true;
-    }
-
-    return false;
+function openDatabase() {
+    return mongoClient.connect();
 }
 
-_appendLog = function (file) {
-    if (!_existLog(file)) {
-        files.push(file);
-        var data = JSON.stringify(files);
-        fs.writeFile("./downloadLog.json", data, 'utf8', (err) => {
-            if (err)
-                console.log(err);
-        });
-    }
+_existLog = function (file, success, fail) {
+    openDatabase().then((client) => {
+        let dbo = client.db("longruan");
+        dbo.collection('publish').find({ ID: file.ID }).toArray().then((files) => {
+            success(files ? files.length > 0 : fail);
+        })
+    }, (err) => {
+        fail(err)
+    })
 }
-_getLog = function (fileId) {
-    for (let index = 0; index < files.length; index++) {
-        if (fileId == files[index].ID)
-            return files[index];
-    }
-    return null;
-}
-_getLogs = function (year, month, day) {
-    var fs = [];
-    files.forEach(file => {
-        var _date = new Date(file.CreateTime);
-        if (_date.getFullYear() == year &&
-            _date.getMonth() == month &&
-            _date.getDate() == day) {
-            fs.push({
-                id: file.ID,
-                Name: file.Name + file.FileExt,
-                Department: file.DeptName,
-                Creator: file.CreatorName,
-                CreateTime: file.CreateTime,
-                Remark: file.Remark,
-                FileSize: file.FileSize
-            })
-        }
-    });
 
-    return fs;
+_appendLog = function (file, success, fail) {
+    openDatabase().then((client) => {
+        let dbo = client.db("longruan");
+        dbo.collection('publish').insertOne(file).then((file) => {
+            success(file);
+        })
+    }, (err) => {
+        fail(err)
+    })
+}
+_getLog = function (fileId, success, fail) {
+    openDatabase().then((client) => {
+        let dbo = client.db("longruan");
+        dbo.collection('publish').find({ ID: fileId }).toArray().then((files) => {
+            success(files);
+        })
+    }, (err) => {
+        fail(err)
+    })
+
+}
+_getLogs = function (year, month, day, success, fail) {
+    openDatabase().then((client) => {
+        let dbo = client.db("longruan");
+        dbo.collection('publish').find().toArray().then((fs) => {
+            var files = [];
+            fs.forEach(file => {
+                var _date = new Date(file.CreateTime);
+                if (_date.getFullYear() == year &&
+                    _date.getMonth() == month &&
+                    _date.getDate() == day) {
+                    files.push(file);
+                }
+            });
+            success(files);
+        })
+    }, (err) => {
+        fail(err)
+    })
+
 }
 
 module.exports = {
