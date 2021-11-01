@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="lib/bootstrap.min.css">
+    <style>
+        .bg {
+            height: 600px;
+            background-image: url(images/bg.jpg);
+            background-size: cover;
+        }
+
+        .form {
+            padding: 40px;
+            margin-top: 175px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .footer {
+            height: 60px;
+            padding-top: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="page-header">
+            <h1>云桌面发布管理</h1>
+        </div>
+        <div class="container-fluid">
+            <div class="row bg">
+                <div
+                    class="col-md-offset-6 col-md-4 col-sm-offset-3 col-sm-7 col-xs-offset-2 col-xs-8 col-lg-offset-6 col-lg-3 form">
+                    <form class="form-horizontal" id="loginForm">
+                        <div class="form-group">
+                            <label for="username" class="col-sm-4 control-label">用户名</label>
+                            <div class="col-sm-8">
+                                <input type="text" class="form-control" v-model="username" placeholder="请输入用户名"
+                                    tabindex="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="password" class="col-sm-4 control-label">密码</label>
+                            <div class="col-sm-8">
+                                <input type="password" class="form-control" v-model="password" placeholder="请输入密码">
+                            </div>
+                        </div>
+                        <!-- <div class="form-group">
+                        <label for="validateCode" class="col-sm-4 control-label">验证码</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="validateCode" placeholder="请输入验证码">
+                        </div>
+                        <div class="col-sm-4">
+                            <img src="images/yzm.jpg" alt="" width="75px" height="35px">
+                        </div>
+                    </div> -->
+                        <!-- <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox">记住我
+                                </label>
+                            </div>
+                        </div>
+                    </div> -->
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="button" v-on:click="onLogin" class="btn btn-primary"
+                                    style="width: 50%;">登录</button>
+                            </div>
+                        </div>
+                    </form>
+                    <span style="color: red;">{{tips}} </span>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>北京龙软科技股份有限公司 智慧城市事业部</p>
+            </div>
+        </div>
+    </div>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="lib/bootstrap.min.js"></script>
+    <script src="lib/axios.min.js"></script>
+    <script src="lib/vue.js"></script>
+    <script src="login.js"></script>
+</body>
+
+</html>

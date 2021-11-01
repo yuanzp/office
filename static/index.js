@@ -55,7 +55,7 @@
             updateView: function () {
                 var target = this;
                 axios({
-                    'url': "/files",
+                    'url': location.pathname + "files",
                     "method": 'get',
                     params: {
                         "year": this.cDate.getFullYear(),
