@@ -19,7 +19,7 @@
                     userpass: this.password
                 }).then((res) => {
                     if (res.data.success) {
-                        location.href = "/platform"
+                        location.href = "/platform/"
                     } else {
                         target.tips=res.data.message;                        
                     }
