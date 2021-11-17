@@ -1,6 +1,5 @@
 const { ObjectId } = require("bson");
 const express = require("express");
-const { del } = require("request");
 const router = express.Router();
 const table = require("../model/table")
 const dateUtil = require("../public/js/date")
@@ -9,12 +8,22 @@ const TABLE_NAME = "projectTask";
 
 router.get("/:itemId", (req, res) => {//获取项目所有任务
     let itemId = req.params.itemId;
+    let week = parseInt(req.query.week?req.query.week:0);
 
     table.get(TABLE_NAME).then((dataTable) => {
         dataTable.find({ itemId: itemId }).sort({ sort: 1 }).toArray().then((result) => {
+            let tasks = [];
+            for (var i = 0; i < result.length; i++) {
+                var task = result[i];
+                var day = Date.parse(new Date(task.createTime));
+                if (dateUtil.inWeek(day, week)) {
+                    tasks.push(task);
+                }
+            }
+
             res.send({
                 code: 1,
-                data: result
+                data: tasks
             })
         })
     })

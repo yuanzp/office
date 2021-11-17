@@ -1,25 +1,16 @@
 const express = require("express");
 const router = express.Router();
+const table = require("../model/table")
 
-const MongoClient = require("mongodb").MongoClient;
-const url = "mongodb://admin:longruan@localhost:27017/longruan";
-const mongoClient = new MongoClient(url);
-
-function openDatabase() {
-    return mongoClient.connect();
-}
-router.get("/", (req, res, next) => {
-    res.send("hello")
-});
+const TABLE_NAME = "user";
 
 router.post("/", (req, res, next) => {
     var user = req.body;
     if (user) {
-        openDatabase().then((client) => {
-            let dbo = client.db("longruan");                     
-            dbo.collection('user').find({ userId: user.userId }).toArray().then((result) => {
+        table.get(TABLE_NAME).then((dataTable) => {
+            dataTable.find({ userId: user.userId }).toArray().then((result) => {
                 if (result.length == 0) {//不存在的情况下，添加
-                    dbo.collection("user").insertOne(user).then((u) => {
+                    dataTable.insertOne(user).then((u) => {
                         res.send({
                             state: 1,
                             data: user,
@@ -45,7 +36,26 @@ router.post("/", (req, res, next) => {
 
 
 })
-
+router.get("/employee/:employeeId", (req, res) => {
+    let employeeId =parseInt(req.params.employeeId) ;
+    table.get(TABLE_NAME).then((dataTable) => {
+        dataTable.find({ EmployeeID: employeeId }).toArray().then((result) => {
+            if (result.length > 0) {
+                res.send({
+                    code:1,
+                    data:result[0]
+                })
+            }
+            else
+            {
+                res.send({
+                    code:0,
+                    message:'没有该员工信息'
+                })
+            }
+        })
+    })
+})
 
 
 module.exports = router;
