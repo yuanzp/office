@@ -6,9 +6,41 @@ const dateUtil = require("../public/js/date")
 
 const TABLE_NAME = "projectTask";
 
+router.get("/projectItem", (req, res) => {//获取有任务安排的项目
+    let week = parseInt(req.query.week ? req.query.week : 0);
+
+    table.get(TABLE_NAME).then((dataTable) => {
+        dataTable.find().sort({ sort: 1 }).toArray().then((result) => {
+            let itemIds = [];
+
+            for (var i = 0; i < result.length; i++) {
+                var task = result[i];
+                var day = Date.parse(new Date(task.createTime));
+                if (dateUtil.inWeek(day, week)) {
+                    let b = false;
+                    itemIds.forEach(element => {
+                        if (element == task.itemId) {
+                            b = true;
+                            return true;
+                        }
+                    })
+                    if (!b)
+                        itemIds.push(task.itemId);
+                }
+            }
+
+            res.send({
+                code: 1,
+                data: itemIds
+            })
+        });
+    })
+
+})
+
 router.get("/:itemId", (req, res) => {//获取项目所有任务
     let itemId = req.params.itemId;
-    let week = parseInt(req.query.week?req.query.week:0);
+    let week = parseInt(req.query.week ? req.query.week : 0);
 
     table.get(TABLE_NAME).then((dataTable) => {
         dataTable.find({ itemId: itemId }).sort({ sort: 1 }).toArray().then((result) => {
@@ -125,22 +157,21 @@ router.put("/", (req, res) => {
 })
 
 //删除任务
-router.delete("/",(req,res)=>{
-    let task=req.body;
+router.delete("/", (req, res) => {
+    let task = req.body;
 
     table.get(TABLE_NAME).then((dataTable) => {
-        dataTable.deleteOne({_id:ObjectId(task._id)}).then((result)=>{
-            if(result.deletedCount==1){
+        dataTable.deleteOne({ _id: ObjectId(task._id) }).then((result) => {
+            if (result.deletedCount == 1) {
                 res.send({
-                    code:1,
-                    data:task
+                    code: 1,
+                    data: task
                 })
-            }else
-            {
+            } else {
                 res.send({
-                    code:0,
-                    data:task,
-                    message:'对象不存在，删除失败'
+                    code: 0,
+                    data: task,
+                    message: '对象不存在，删除失败'
                 })
             }
         })

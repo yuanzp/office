@@ -14,6 +14,8 @@ const employeeRouter=require("./router/employee")
 const workLogGroupRouter=require("./router/worklogGroup")
 const workItemRouter=require("./router/workItem")
 const projectTaskRouter=require("./router/projectTask")
+const menuRouter=require("./router/menu")
+const roleRouter=require("./router/role")
 
 app.use("/",indexRouter)
 app.use("/user",userRouter)
@@ -22,6 +24,8 @@ app.use("/employee",employeeRouter)
 app.use("/worklogGroup",workLogGroupRouter)
 app.use("/workItem",workItemRouter)
 app.use("/projectTask",projectTaskRouter)
+app.use("/menu",menuRouter)
+app.use("/role",roleRouter)
 
 
 

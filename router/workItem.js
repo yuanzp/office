@@ -3,9 +3,27 @@ const express = require("express");
 const router = express.Router();
 const table = require("../model/table")
 
-router.get("/", (req, res) => {
+
+router.get("/", (req, res) => {    
     table.get("workItem").then((workItem) => {
         workItem.find().sort({ order: 1 }).toArray().then((result) => {
+            res.send({
+                code: 1,
+                data: result
+            })
+        })
+    })
+})
+
+
+router.get("/current", (req, res) => {
+    let y = req.query.year == null ? new Date().getFullYear() : req.query.year;
+    y=y+'';
+    let xm = "xm"+ y.substr(2, 2)+"-";
+
+    var reg = new RegExp(xm);
+    table.get("workItem").then((workItem) => {
+        workItem.find({ itemId: { $regex: reg } }).sort({ order: 1 }).toArray().then((result) => {
             res.send({
                 code: 1,
                 data: result
@@ -42,12 +60,11 @@ router.post("/", (req, res) => {
 
                     })
                 })
-
             }
-
         })
     })
 })
+
 
 
 router.put("/", (req, res) => {
