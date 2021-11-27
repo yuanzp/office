@@ -35,4 +35,18 @@ router.post("/",(req,res)=>{
     })
 })
 
+
+
+
+router.get("/role/:id",(req,res)=>{
+    let _id=req.params.id;
+
+    res.send({
+        code:0,
+        data:_id,
+        message:'尚未实现'
+    })
+})
+
+
 module.exports = router;

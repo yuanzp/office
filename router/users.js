@@ -5,16 +5,30 @@ const table = require("../model/table")
 
 const TABLE_NAME = "user";
 
-router.get("/",(req,res)=>{//获取用户信息
+router.get("/", (req, res) => {//获取用户信息
     table.get(TABLE_NAME).then((dataTable) => {
         dataTable.find().toArray().then((result) => {
             res.send({
-                code:1,
-                data:result
+                code: 1,
+                data: result
             })
         })
     });
 })
+
+router.get("/departmentUser/:departId", (req, res) => {//获取用户信息
+    let departId = req.params.departId;
+
+    table.get(TABLE_NAME).then((dataTable) => {
+        dataTable.find({ DepartmentID: departId }).sort({ UserID: 1 }).toArray().then((result) => {
+            res.send({
+                code: 1,
+                data: result
+            })
+        })
+    });
+})
+
 
 router.post("/", (req, res, next) => {
     var user = req.body;
@@ -47,22 +61,43 @@ router.post("/", (req, res, next) => {
     }
 })
 
+router.post("/role", (req, res) => {
+    let userId = req.body.UserId;
+    let role = req.body.role;
+    table.get(TABLE_NAME).then((dataTable) => {
+        dataTable.updateOne({ UserId: userId }, { $set: { role: role } }).then((result) => {
+            if (result.modifiedCount == 1 || result.matchedCount==1) {//不准确
+                res.send({
+                    code: 1,
+                    data: result.modifiedCount
+                })
+            }
+            else {
+                res.send({
+                    code: 0,
+                    message: '更新失败'
+                })
+            }
+
+        })
+    })
+})
+
 
 router.get("/employee/:employeeId", (req, res) => {
-    let employeeId =parseInt(req.params.employeeId) ;
+    let employeeId = parseInt(req.params.employeeId);
     table.get(TABLE_NAME).then((dataTable) => {
         dataTable.find({ EmployeeID: employeeId }).toArray().then((result) => {
             if (result.length > 0) {
                 res.send({
-                    code:1,
-                    data:result[0]
+                    code: 1,
+                    data: result[0]
                 })
             }
-            else
-            {
+            else {
                 res.send({
-                    code:0,
-                    message:'没有该员工信息'
+                    code: 0,
+                    message: '没有该员工信息'
                 })
             }
         })
