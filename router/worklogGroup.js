@@ -5,7 +5,7 @@ const table = require("../model/table")
 
 router.get("/", (req, res) => {//获取所有组
     table.get("worklogGroup").then((worklogGroup) => {
-        worklogGroup.find().toArray().then((result) => {
+        worklogGroup.find().sort({order:1}).toArray().then((result) => {
             res.send({
                 code: 1,
                 data: result

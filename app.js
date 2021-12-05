@@ -17,6 +17,18 @@ const projectTaskRouter=require("./router/projectTask")
 const menuRouter=require("./router/menu")
 const roleRouter=require("./router/role")
 
+// app.use((req,res,next)=>{
+// 	let u=req.headers['gw-user'];
+// 	if(u!=null){
+// 		let user=JSON.parse(u);
+// 		res.cookie("userName",user.LoginName);
+// 	}
+	
+	
+// 	next();
+
+// })
+
 app.use("/",indexRouter)
 app.use("/user",userRouter)
 app.use("/department",departRouter)
@@ -26,7 +38,6 @@ app.use("/workItem",workItemRouter)
 app.use("/projectTask",projectTaskRouter)
 app.use("/menu",menuRouter)
 app.use("/role",roleRouter)
-
 
 
 app.use((error, req, res, next) => {

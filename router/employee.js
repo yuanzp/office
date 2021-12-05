@@ -1,40 +1,46 @@
 const express = require("express");
 const router = express.Router();
+const table = require("../model/table")
 
-const MongoClient = require("mongodb").MongoClient;
-const url = "mongodb://admin:longruan@localhost:27017/longruan";
-const mongoClient = new MongoClient(url);
+const TABLE_NAME = "employee";
 
-function openDatabase() {
-    return mongoClient.connect();
-}
 
-router.post("/",(req,res,next)=>{
-    let employee=req.body;
-    openDatabase().then((client)=>{
-        let dbo=client.db("longruan");
-        dbo.collection('employee').find({ employeeNo: employee.employeeNo }).toArray().then((result) => {
+router.post("/", (req, res) => {
+    let employee = req.body;
+
+    table.get(TABLE_NAME).then(employeeTable => {
+        employeeTable.find({ employeeNo: employee.employeeNo }).toArray().then((result) => {
             if (result.length == 0) {//不存在的情况下，添加
-                dbo.collection("employee").insertOne(employee).then((u) => {
+                employeeTable.insertOne(employee).then((u) => {
                     res.send({
                         state: 1,
                         data: employee,
                         message: '添加成功'
                     });
                 })
-            } else {
-                res.send({
-                    state: 0,
-                    data: employee,
-                    message: '员工已经存在'
-                });
+            } else {//21/12/2，之前没有存单位代码，临时的做法
+                employeeTable.updateOne(
+                    { employeeNo: employee.employeeNo }, { $set: { departId: employee.departId } }).then(result => {
+                        res.send({
+                            state: 1,
+                            data: employee,
+                            message: '更新成功'
+                        });
+                    })
             }
         })
-
-
-
     })
-
+})
+router.get("/:departId", (req, res) => {
+    let departId = req.params.departId;
+    table.get(TABLE_NAME).then(employeeTable => {
+        employeeTable.find({ departId: departId }).toArray().then(result => {
+            res.send({
+                code: 1,
+                data: result
+            })
+        })
+    })
 })
 
 

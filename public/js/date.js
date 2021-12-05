@@ -1,3 +1,5 @@
+const { Int32 } = require("bson");
+
 function GetNumberOfDays(date1, date2) {//获得天数
     //date1：开始日期，date2结束日期
     var a1 = Date.parse(new Date(date1));
@@ -7,6 +9,12 @@ function GetNumberOfDays(date1, date2) {//获得天数
 };
 
 //判断是不是在第几周
+/**
+ * 
+ * @param {Date} _date 
+ * @param {Int32} week 
+ * @returns {Boolean}
+ */
 function inWeek(_date, week) {
     let d = new Date();
     let days = GetNumberOfDays(_date, d);

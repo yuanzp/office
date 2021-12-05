@@ -7,26 +7,26 @@ const dateUtil = require("../public/js/date")
 const TABLE_NAME = "projectTask";
 
 router.get("/projectItem", (req, res) => {//获取有任务安排的项目
-    let week = parseInt(req.query.week ? req.query.week : 0);
+    let beginDate = new Date(req.query.beginDate + " 0:0:0");
+    let endDate = new Date(req.query.endDate + " 23:59:59");
 
     table.get(TABLE_NAME).then((dataTable) => {
-        dataTable.find().sort({ sort: 1 }).toArray().then((result) => {
+        dataTable.find({ createTime: { $gt: beginDate, $lt: endDate } }).sort({ sort: 1 }).toArray().then((result) => {
             let itemIds = [];
 
             for (var i = 0; i < result.length; i++) {
                 var task = result[i];
-                var day = Date.parse(new Date(task.createTime));
-                if (dateUtil.inWeek(day, week)) {
-                    let b = false;
-                    itemIds.forEach(element => {
-                        if (element == task.itemId) {
-                            b = true;
-                            return true;
-                        }
-                    })
-                    if (!b)
-                        itemIds.push(task.itemId);
-                }
+
+                let b = false;
+                itemIds.forEach(element => {
+                    if (element == task.itemId) {
+                        b = true;
+                        return true;
+                    }
+                })
+                if (!b)
+                    itemIds.push(task.itemId);
+
             }
 
             res.send({
@@ -62,27 +62,20 @@ router.get("/:itemId", (req, res) => {//获取项目所有任务
 })
 
 router.get("/", (req, res) => {//获取个人任务
-    let userId = req.userId;
-    let week = parseInt(req.query.week);
+    let userId = req.query.userId;
+    // let week = parseInt(req.query.week);
+    let beginDate = new Date(req.query.beginDate + " 0:0:0");
+    let endDate = new Date(req.query.endDate + " 23:59:59");
 
     if (userId == null) {
         userId = JSON.parse(req.headers['gw-user']).ID;
     }
 
     table.get(TABLE_NAME).then((dataTable) => {
-        dataTable.find({ userId: userId }).sort({ sort: 1 }).toArray().then((result) => {
-            let tasks = [];
-            for (var i = 0; i < result.length; i++) {
-                var task = result[i];
-                var day = Date.parse(new Date(task.createTime));
-                if (dateUtil.inWeek(day, week)) {
-                    tasks.push(task);
-                }
-            }
-
+        dataTable.find({ userId: userId, createTime: { $gt: beginDate, $lt: endDate } }).sort({ sort: 1 }).toArray().then((result) => {
             res.send({
                 code: 1,
-                data: tasks
+                data: result
             })
         })
     })
@@ -96,7 +89,7 @@ router.post("/", (req, res) => {//创建任务
     _task.sort = task.sort;
     _task.cost = task.cost;
 
-
+    //先按照任务只能自己创建的方式
     let user = JSON.parse(req.headers['gw-user']);
     _task.userId = user.ID;
     _task.userName = user.DisplayName;

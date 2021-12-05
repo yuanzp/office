@@ -1,5 +1,4 @@
 const express = require("express");
-const { route } = require(".");
 const router = express.Router();
 const table = require("../model/table")
 
@@ -14,6 +13,47 @@ router.get("/", (req, res) => {//获取用户信息
             })
         })
     });
+})
+
+router.get("/my", (req, res) => {
+    let u = req.headers["gw-user"];
+    if (u == null) {
+        res.send({
+            code: 0,
+            message: '没有登录成功，获取身份信息失败'
+        })
+    } else {
+        let user = JSON.parse(u);
+        table.get(TABLE_NAME).then((dataTable) => {
+            dataTable.find({ UserId: user.ID }).toArray().then(result => {
+                if (result.length == 0) {
+                    res.send({
+                        code: 2,
+                        data: {
+                            ID: user.ID,
+                            DisplayName: user.DisplayName,
+                            LoginName: user.LoginName,
+                            DepartmentName: user.DeptName,
+                            DepartmentID:user.DeptID
+                        }
+                    })
+                } else {
+                    u = result[0];
+                    res.send({
+                        code: 1,
+                        data: {
+                            ID: user.ID,
+                            DisplayName: user.DisplayName,
+                            LoginName: user.LoginName,
+                            DepartmentName: user.DeptName,
+                            DepartmentID:user.DeptID,
+                            EmployeeID: u.EmployeeID
+                        }
+                    })
+                }
+            })
+        });
+    }
 })
 
 router.get("/departmentUser/:departId", (req, res) => {//获取用户信息
@@ -50,6 +90,16 @@ router.post("/", (req, res, next) => {
                         message: '用户已经存在'
                     });
                 }
+
+                table.get("employee").then(employeeTable => {
+                    employeeTable.updateOne({ employeeNo: user.EmployeeNo }, {
+                        $set: {
+                            Sex: user.Sex, Position: user.Position, Culture: user.Culture, Professional: user.Professional, School: user.School, HireDate: user.HireDate
+                        }
+                    }).then(result => {
+                        // console.log(result.matchedCount);
+                    })
+                })
             })
         })
     } else {
@@ -66,7 +116,7 @@ router.post("/role", (req, res) => {
     let role = req.body.role;
     table.get(TABLE_NAME).then((dataTable) => {
         dataTable.updateOne({ UserId: userId }, { $set: { role: role } }).then((result) => {
-            if (result.modifiedCount == 1 || result.matchedCount==1) {//不准确
+            if (result.modifiedCount == 1 || result.matchedCount == 1) {//不准确
                 res.send({
                     code: 1,
                     data: result.modifiedCount
