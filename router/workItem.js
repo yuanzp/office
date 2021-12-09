@@ -3,10 +3,11 @@ const express = require("express");
 const router = express.Router();
 const table = require("../model/table")
 
+const TABLE_NAME = "workItem";
 
-router.get("/", (req, res) => {    
+router.get("/", (req, res) => {
     table.get("workItem").then((workItem) => {
-        workItem.find().sort({ order: 1 }).toArray().then((result) => {
+        workItem.find().sort({ state: 1 }).toArray().then((result) => {
             res.send({
                 code: 1,
                 data: result
@@ -17,13 +18,16 @@ router.get("/", (req, res) => {
 
 
 router.get("/current", (req, res) => {
+    let options = req.query.options;
     let y = req.query.year == null ? new Date().getFullYear() : req.query.year;
-    y=y+'';
-    let xm = "xm"+ y.substr(2, 2)+"-";
+    y = y + '';
+    let xm = "xm" + y.substr(2, 2) + "-";
 
     var reg = new RegExp(xm);
+
+    let filter = options == 1 ? { itemId: { $regex: reg }, state: 1 } : { itemId: { $regex: reg } }
     table.get("workItem").then((workItem) => {
-        workItem.find({ itemId: { $regex: reg } }).sort({ order: 1 }).toArray().then((result) => {
+        workItem.find(filter).sort({ state: 1 }).toArray().then((result) => {
             res.send({
                 code: 1,
                 data: result
@@ -65,6 +69,75 @@ router.post("/", (req, res) => {
     })
 })
 
+router.post("/input", async (req, res) => {
+    let data = req.body.itemArray;
+    let dataTable = await table.get(TABLE_NAME);
+
+    // 检查一条数据
+    const checkOne = item => {
+        return new Promise((resolve) => {
+            dataTable.find({ itemId: item.ID }).toArray().then(result => {
+                resolve({
+                    item,
+                    isExist: result.length == 1
+                })
+            });
+        })
+    }
+
+    let _all = [];
+    data.forEach(element => {
+        _all.push(checkOne(element))
+    });
+
+    const checkResult = await Promise.all(_all);
+
+    const insertOne = item => {
+        return dataTable.insertOne({
+            itemId: item.ID,
+            name: item.Name,
+            shortName: item.Name,
+            state: 0
+        })
+    }
+
+    _all = [];
+    checkResult.forEach(result => {
+        if (!result.isExist)
+            _all.push(insertOne(result.item));
+    })
+
+    const insertResult = await Promise.all(_all);
+    let count = 0;
+    insertResult.forEach(e => {
+        if (e.acknowledged) count++;
+    })
+
+    res.send({
+        code: 1,
+        data: count
+    })
+})
+
+
+router.post("/:itemId", (req, res) => {
+    let itemId = req.params.itemId;
+    let key = req.body.updateKey;
+    let val = req.body.updateVal;
+    let updateObj = {};
+    updateObj[key] = val;
+
+    table.get(TABLE_NAME).then((dataTable) => {
+        dataTable.updateOne({ itemId: itemId }, { $set: updateObj }).then(result => {
+            res.send({
+                code: 1,
+                data: result.modifiedCount
+            })
+        })
+    })
+
+
+})
 
 
 router.put("/", (req, res) => {

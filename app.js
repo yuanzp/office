@@ -4,7 +4,7 @@ const fs = require('fs')
 const express = require('express')
 const app = express()
 const port = 6001
-app.use(express.json())
+app.use(express.json({limit:'10mb'}))
 app.use(express.urlencoded({ extended: false }))
 
 const indexRouter=require("./router/index")
