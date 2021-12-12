@@ -1,9 +1,5 @@
 {
-    "server":{
-        "host":"http://123.57.43.61",
-        "username":"yuanzhaoping",
-        "password":"yuan1890"
-    },
-    "localStorage":"/home/zhcs/download/",
-    "downloader":["孙永","袁兆平","李颖","孙阳芳"]
+    
+    "localStorage":"/root/upload/"
+    
 }

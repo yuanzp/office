@@ -204,3 +204,4 @@ node_modules
 .vscode
 nohup.out
 *.log
+dist

@@ -1,9 +1,19 @@
-const { ObjectId } = require("bson");
+
 const express = require("express");
 const router = express.Router();
 const table = require("../model/table")
 
 const TABLE_NAME = "workItem";
+
+
+let user = null;
+
+router.use((req, res, next) => {
+    user = JSON.parse(req.headers['gw-user']);
+    next()
+})
+
+
 
 router.get("/", (req, res) => {
     table.get("workItem").then((workItem) => {
@@ -61,7 +71,6 @@ router.post("/", (req, res) => {
                             data: _workItem,
                             messsage: '添加成功'
                         })
-
                     })
                 })
             }
@@ -115,7 +124,7 @@ router.post("/input", async (req, res) => {
 
     res.send({
         code: 1,
-        data: count
+        data: count,
     })
 })
 
