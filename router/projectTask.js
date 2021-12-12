@@ -85,7 +85,9 @@ router.post("/", (req, res) => {//创建任务
     let task = req.body;
     let _task = {};
     _task.itemId = task.itemId;
-    _task.title = task.title;
+    _task.itemName=task.itemName;
+
+    _task.title = task.title;    
     _task.sort = task.sort;
     _task.cost = task.cost;
 

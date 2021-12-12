@@ -238,8 +238,8 @@ router.put("/:id", async (req, res) => {//复制或者移动文件、文件夹
     file.createTime = new Date();
 
     if (action == 2) {//复制
-        let filename = ObjectId().str;
-        fs.cpSync(FILE_PATH + file.fileId, filename);
+        let filename = ObjectId().toString();
+        fs.copyFileSync(FILE_PATH + file.fileId, FILE_PATH+filename);
         file.fileId = filename;
 
         delete file['_id'];
